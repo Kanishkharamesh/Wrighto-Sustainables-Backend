@@ -16,7 +16,12 @@ const cookieParser = require("cookie-parser");
 const morgan = require('morgan');
 
 const cors = require('cors');
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://wrighto-sustainables-frontend.onrender.com'],
+  credentials: true
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 
