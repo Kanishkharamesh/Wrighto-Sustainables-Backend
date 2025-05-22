@@ -47,8 +47,8 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
 
         res.cookie("token", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "Lax",
+            secure: true,
+            sameSite: "None",
             maxAge: 3 * 24 * 60 * 60 * 1000 // 3 days
         });
 
