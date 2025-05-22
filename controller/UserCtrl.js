@@ -52,7 +52,6 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
 
         res.json({
             success: true,
-            token: generateToken(findUser._id),
             user: {
                 _id: findUser._id,
                 firstname: findUser.firstname,
