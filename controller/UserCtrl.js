@@ -38,7 +38,9 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
             });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            maxAge: 72 * 60 * 60 * 1000,
+            secure: true,
+            sameSite: "None",
+            maxAge: 72 * 60 * 60 * 1000, // 3 days
         });
 
         const accessToken = generateToken(findUser._id);
@@ -656,21 +658,21 @@ const getUserOrders = async (req, res) => {
 // const getInvoiceUser = asyncHandler(async (req, res) => {
 //     const { _id } = req.user;
 //     validateMongoDbId(_id);
-  
+
 //     try {
 //         const orders = await Order.find({ user: _id })
 //         .populate('items.product', 'name')
 //         .sort({ createdAt: -1 });
-      
+
 //       const sanitizedOrders = orders.map(order => ({
 //         ...order.toObject(),
 //         gstAmount: order.gstAmount ?? 0,
 //       }));
-      
+
 //       if (!orders || orders.length === 0) {
 //         return res.status(404).json({ message: "No orders found for this user" });
 //       }
-  
+
 //       res.status(200).json(orders);
 //     } catch (error) {
 //       console.error("Error fetching user orders:", error);
@@ -679,56 +681,56 @@ const getUserOrders = async (req, res) => {
 //   });
 
 const getInvoiceUser = asyncHandler(async (req, res) => {
-        const { _id } = req.user;
-        validateMongoDbId(_id);
-    
-        try {
-            const orders = await Order.find({ user: _id })
-                .populate('items.product', 'name pricePerPiece')
-                .sort({ createdAt: -1 });
-    
-            if (!orders || orders.length === 0) {
-                return res.status(404).json({ message: "No orders found for this user" });
-            }
-    
-            const sanitizedOrders = orders.map(order => {
-                const orderObj = order.toObject();
-    
-                const subtotal = orderObj.items.reduce((acc, item) => {
-                    const price = item.product?.pricePerPiece || 0;
-                    const qty = item.quantity || 1;
-                    return acc + price * qty;
-                }, 0);
-    
-                const gstRate = 0.18;
-                const gstAmount = orderObj.gstAmount !== undefined
-                    ? orderObj.gstAmount
-                    : +(subtotal * gstRate).toFixed(2);
-    
-                const deliveryCharge = orderObj.deliveryCharge !== undefined
-                    ? orderObj.deliveryCharge
-                    : 50;
-    
-                const grandTotal = orderObj.grandTotal !== undefined
-                    ? orderObj.grandTotal
-                    : +(subtotal + gstAmount + deliveryCharge).toFixed(2);
-    
-                return {
-                    ...orderObj,
-                    subtotal: +subtotal.toFixed(2),
-                    gstAmount,
-                    deliveryCharge,
-                    grandTotal
-                };
-            });
-    
-            res.status(200).json(sanitizedOrders);
-        } catch (error) {
-            console.error("Error fetching user orders:", error);
-            res.status(500).json({ message: "Something went wrong", error: error.message });
-        }
-    });
-    
+    const { _id } = req.user;
+    validateMongoDbId(_id);
+
+    try {
+        const orders = await Order.find({ user: _id })
+            .populate('items.product', 'name pricePerPiece')
+            .sort({ createdAt: -1 });
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({ message: "No orders found for this user" });
+        }
+
+        const sanitizedOrders = orders.map(order => {
+            const orderObj = order.toObject();
+
+            const subtotal = orderObj.items.reduce((acc, item) => {
+                const price = item.product?.pricePerPiece || 0;
+                const qty = item.quantity || 1;
+                return acc + price * qty;
+            }, 0);
+
+            const gstRate = 0.18;
+            const gstAmount = orderObj.gstAmount !== undefined
+                ? orderObj.gstAmount
+                : +(subtotal * gstRate).toFixed(2);
+
+            const deliveryCharge = orderObj.deliveryCharge !== undefined
+                ? orderObj.deliveryCharge
+                : 50;
+
+            const grandTotal = orderObj.grandTotal !== undefined
+                ? orderObj.grandTotal
+                : +(subtotal + gstAmount + deliveryCharge).toFixed(2);
+
+            return {
+                ...orderObj,
+                subtotal: +subtotal.toFixed(2),
+                gstAmount,
+                deliveryCharge,
+                grandTotal
+            };
+        });
+
+        res.status(200).json(sanitizedOrders);
+    } catch (error) {
+        console.error("Error fetching user orders:", error);
+        res.status(500).json({ message: "Something went wrong", error: error.message });
+    }
+});
+
 module.exports = {
     createUser,
     loginUserCtrl,
