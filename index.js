@@ -39,6 +39,10 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/contact', contactRouter);
 app.use("/api/reviews", reviewRoutes);
 
+app.get('/', (req, res) => {
+  res.send('✅ Wrighto Sustainables Backend is live!');
+});
+
 app.use(notFound);
 app.use(errorHandler);
 
