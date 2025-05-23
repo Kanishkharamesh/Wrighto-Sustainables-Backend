@@ -37,10 +37,10 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
                 new: true
             });
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "None",
-            maxAge: 72 * 60 * 60 * 1000, // 3 days
+          httpOnly: true,
+          secure: true, // required for SameSite=None
+          sameSite: "None", // allows cross-site cookie sending
+          maxAge: 72 * 60 * 60 * 1000,
         });
 
         const accessToken = generateToken(findUser._id);
